@@ -1,0 +1,17 @@
+Perfil
+Bloquear Usuarios
+Resetear Clave Usuarios - Envio de clave al email
+
+
+Usuario por localidad
+Roles de Usuario
+Carga de Usuario
+
+Usuario
+ - Datos modificables por externo
+ - Roles
+ - Localidades
+     - Tramites
+ - Estado Bloqueado
+
+CLIENTE EXTERNO
