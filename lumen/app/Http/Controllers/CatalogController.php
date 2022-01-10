@@ -13,6 +13,14 @@ use stdClass;
 class CatalogController extends Controller {
 
 
+    public function pruebamz(Request $data, $folder) {
+        return 'entre mz';
+    }
+
+    public function prueba(Request $data, $folder) {
+        return 'entre DMZ';
+    }
+
     public function upload_items(Request $data, $folder) {
         $toReturn = [];
         $body = $data->json()->all();
@@ -60,17 +68,27 @@ class CatalogController extends Controller {
         return response()->json($toReturn, 200);
     }
 
-    public function update_item(Request $data) {
+    public function update_item(Request $data, $folder) {
         $body = $data->json()->all();
-
-        $toReturn = new stdClass();
-        return response()->json($toReturn, 200);
+        $id = $body['item_id'];
+        $item = $body['item'];
+        $item['timestamp'] = date('Y-m-d H:i:s');
+        $updated = DB::collection($folder)->where('item_id', $id)->update($item, ['upsert' => false]);
+        if ($updated) {
+            return response()->json('Datos Actualizados Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar actualizar el item', 400);
+        }
     }
 
     public function delete_item(Request $data, $folder) {
         $id = $data['item_id'];
-        $toReturn = DB::collection($folder)->where('item_id',$id)->delete();
-        return response()->json($toReturn, 200);
+        $deleted = DB::collection($folder)->where('item_id',$id)->delete();
+        if ($deleted) {
+            return response()->json('Item Eliminado Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar eliminar el item', 400);
+        }
     }
 
 }

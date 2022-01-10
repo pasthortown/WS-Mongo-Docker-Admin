@@ -6,7 +6,7 @@ use App\Utils\Helpers;
 use Closure;
 use Illuminate\Support\Facades\Config;
 
-class Authenticate
+class BddAuth
 {
     /**
      * Handle an incoming request.

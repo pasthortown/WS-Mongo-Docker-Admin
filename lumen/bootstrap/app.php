@@ -80,7 +80,9 @@ $app->configure('app');
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
-    'multidb' => App\Http\Middleware\MultiDB::Class,
+    'multidb' => App\Http\Middleware\MultiDB::class,
+    'multidmz' => App\Http\Middleware\MultiDMZ::class,
+    'bddauth' => App\Http\Middleware\BddAuth::class,
 ]);
 
 $app->routeMiddleware([

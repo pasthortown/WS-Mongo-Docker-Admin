@@ -1,0 +1,250 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\DummyModel;
+use Illuminate\Http\Request;
+use Exception;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
+use stdClass;
+
+class AuthController extends Controller {
+
+    protected $folder = 'users';
+
+    public function login(Request $data) {
+        $body = $data->json()->all();
+        try {
+            $password = $body['password'];
+            $email = $body['email'];
+            $user = DB::collection($this->folder)
+                ->where('email',$email)
+                ->first();
+            if (!$user) {
+                return response()->json('Acceso no autorizado', 400);
+            }
+            if (!$user['active']) {
+                return response()->json('Cuenta bloqueada por exceso de intentos', 400);
+            }
+            if ($user['disabled']) {
+                return response()->json('Cuenta bloqueada por el administrador', 400);
+            }
+            if ($password !== Crypt::decryptString($user['password'])) {
+                $toUpdate['login_tries'] = $user['login_tries'] + 1;
+                if ($toUpdate['login_tries'] == 3) {
+                    $toUpdate['active'] = false;
+                    $message = 'Cuenta bloqueada por exceso de intentos';
+                } else {
+                    $message = 'Acceso no autorizado, intentos disponibles '. (3-$toUpdate['login_tries']);
+                }
+                $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+                return response()->json($message, 400);
+            }
+            $toUpdate['login_tries'] = 0;
+            $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+            unset($user['password']);
+            $toReturn = new stdClass();
+            $toReturn->token = ''; // generar un token
+            $toReturn->user_data = $user;
+            return response()->json($toReturn, 200);
+        } catch( Exception $e ) {
+            return response()->json('Los campos email y password son requeridos', 400);
+        }
+    }
+
+    public function recovery(Request $data) {
+        $email = $data['email'];
+        $attributes = ['item_id', 'timestamp'];
+        $preview_user = DB::collection($this->folder)->where('email',$email)->get($attributes);
+        if (sizeof($preview_user)>0) {
+            return response()->json('El correo electrónico proporcionado no se encuentra asociado a cuenta alguna', 400);
+        }
+        $this->send_email('password_recovery_request',$email);
+        return response()->json('Solicitud de recuperación de contraseña enviada al correo electrónico proporcionado', 200);
+    }
+
+    public function reset_password(Request $data) {
+        // OBTENER EL EMAIL A PARTIR DEL TOKEN
+        $email = $data['email'];
+        $toUpdate = [];
+        $toUpdate['timestamp'] = date('Y-m-d H:i:s');
+        $toUpdate['active'] = true;
+        $toUpdate['login_tries'] = 0;
+        $password = $this->gen_password();
+        $toUpdate['password'] = Crypt::encryptString($password);
+        $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+        if ($updated) {
+            $this->send_email('password_reset',$toUpdate);
+            return response()->json('Contraseña actualizada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
+        } else {
+            return response()->json('Ocurrió un error al resetear la contraseña del usuario', 400);
+        }
+    }
+
+    public function reset_password_user(Request $data) {
+        $id = $data['item_id'];
+        $toUpdate = [];
+        $toUpdate['timestamp'] = date('Y-m-d H:i:s');
+        $toUpdate['active'] = true;
+        $toUpdate['login_tries'] = 0;
+        $password = $this->gen_password();
+        $toUpdate['password'] = Crypt::encryptString($password);
+        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        if ($updated) {
+            $this->send_email('password_reset_admin',$toUpdate);
+            return response()->json('Contraseña generada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
+        } else {
+            return response()->json('Ocurrió un error al resetear la contraseña del usuario', 400);
+        }
+    }
+
+    public function register(Request $data) {
+        $body = $data->json()->all();
+        try {
+            $password = $this->gen_password();
+            $item = $body['item'];
+            $email = $item['email'];
+            $attributes = ['item_id', 'timestamp'];
+            $preview_user = DB::collection($this->folder)->where('email',$email)->get($attributes);
+            if (sizeof($preview_user)>0) {
+                return response()->json('El correo electrónico proporcionado ya se encuentra asociado a una cuenta', 400);
+            }
+            $item['timestamp'] = date('Y-m-d H:i:s');
+            $item['disabled'] = false;
+            $item['active'] = true;
+            $item['login_tries'] = 0;
+            $item['password'] = Crypt::encryptString($password);
+            DB::collection($this->folder)->insert($item);
+            $this->send_email('register',$item);
+            return response()->json('Cuenta creada satisfactoriamente, la contraseña a sido enviada al correo electrónico proporcionado', 200);
+        } catch( Exception $e ) {
+            return response()->json('Error al crear la cuenta, debe proporcionar un objeto item con el email al que se asociará la cuenta', 400);
+        }
+    }
+
+    public function upload_users(Request $data) {
+        $toReturn = [];
+        $body = $data->json()->all();
+        foreach($body['items'] as $item){
+            $item['item_id'] = uniqid();
+            $item['timestamp'] = date('Y-m-d H:i:s');
+            $item['disabled'] = false;
+            $item['active'] = true;
+            $item['login_tries'] = 0;
+            $item['password'] = Crypt::encryptString($item['email']);
+            DB::collection($this->folder)->insert($item);
+            array_push($toReturn,$item);
+        }
+        return response()->json($toReturn, 200);
+    }
+
+    public function get_users(Request $data) {
+        $id = $data['item_id'];
+        $body = $data->json()->all();
+        if (array_key_exists('output_model', $body)) {
+            $output_model = $body['output_model'];
+            $attributes = ['item_id', 'timestamp'];
+            foreach($output_model as $key=>$value) {
+                if ($value) {
+                    array_push($attributes, $key);
+                }
+            }
+        } else {
+            $attributes = false;
+        }
+        if (array_key_exists('filter', $body)) {
+            $filter = $body['filter'];
+        } else {
+            $filter = false;
+        }
+        $toReturn = DB::collection($this->folder);
+        if ($filter) {
+            $toReturn = $toReturn->where($filter['attribute'], $filter['value']);
+        } else {
+            if ($id) {
+                $toReturn = $toReturn->where('item_id',$id);
+            }
+        }
+        if ($attributes) {
+            $toReturn = $toReturn->get($attributes);
+        } else {
+            $toReturn = $toReturn->get();
+        }
+        $users = [];
+        foreach($toReturn as $user) {
+            unset($user['password']);
+            array_push($users, $user);
+        }
+        return response()->json($users, 200);
+    }
+
+    public function update_user(Request $data) {
+        $body = $data->json()->all();
+        $id = $body['item_id'];
+        $item = $body['item'];
+        $item['timestamp'] = date('Y-m-d H:i:s');
+        $updated = DB::collection($this->folder)->where('item_id', $id)->update($item, ['upsert' => false]);
+        if ($updated) {
+            return response()->json('Datos del Usuario Actualizados Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar actualizar el usuario', 400);
+        }
+    }
+
+    public function delete_user(Request $data) {
+        $id = $data['item_id'];
+        $deleted = DB::collection($this->folder)->where('item_id',$id)->delete();
+        if ($deleted) {
+            return response()->json('Usuario Eliminado Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar eliminar el usuario', 400);
+        }
+    }
+
+    public function lock_user(Request $data) {
+        $id = $data['item_id'];
+        $toUpdate = [];
+        $toUpdate['timestamp'] = date('Y-m-d H:i:s');
+        $toUpdate['disabled'] = true;
+        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        if ($updated) {
+            return response()->json('Usuario Bloqueado Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar bloquear el usuario', 400);
+        }
+    }
+
+    public function unlock_user(Request $data) {
+        $id = $data['item_id'];
+        $toUpdate = [];
+        $toUpdate['timestamp'] = date('Y-m-d H:i:s');
+        $toUpdate['disabled'] = false;
+        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        if ($updated) {
+            return response()->json('Usuario Desbloqueado Correctamente', 200);
+        } else {
+            return response()->json('Ocurrió un error al intentar desbloquear el usuario', 400);
+        }
+    }
+
+    private function send_email($tipo, $data) {
+        switch($tipo) {
+            case 'password_reset_admin':
+                break;
+            case 'password_recovery_request':
+                break;
+            case 'password_reset':
+                break;
+            case 'register':
+                break;
+        }
+    }
+
+    private function gen_password() {
+        return Str::random(10);
+    }
+}

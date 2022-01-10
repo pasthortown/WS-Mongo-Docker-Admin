@@ -6,7 +6,7 @@ use App\Utils\Helpers;
 use Closure;
 use Illuminate\Support\Facades\Config;
 
-class Authenticate
+class MultiDMZ
 {
     /**
      * Handle an incoming request.
@@ -17,7 +17,7 @@ class Authenticate
      */
     public function handle($request, Closure $next)
     {
-        Helpers::EstablecerDBName('Auth');
+        Helpers::EstablecerDBName('DMZ');
         return $next($request);
     }
 
