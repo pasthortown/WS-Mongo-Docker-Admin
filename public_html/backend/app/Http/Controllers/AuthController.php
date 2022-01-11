@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DummyModel;
 use Illuminate\Http\Request;
+use Firebase\JWT\ExpiredException;
 use Exception;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use stdClass;
+use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller {
 
@@ -48,7 +51,7 @@ class AuthController extends Controller {
             $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
             unset($user['password']);
             $toReturn = new stdClass();
-            $toReturn->token = ''; // generar un token
+            $toReturn->token = $this->gen_token($email);
             $toReturn->user_data = $user;
             return response()->json($toReturn, 200);
         } catch( Exception $e ) {
@@ -58,18 +61,42 @@ class AuthController extends Controller {
 
     public function recovery(Request $data) {
         $email = $data['email'];
-        $attributes = ['item_id', 'timestamp'];
-        $preview_user = DB::collection($this->folder)->where('email',$email)->get($attributes);
-        if (sizeof($preview_user)>0) {
+        $preview_user = DB::collection($this->folder)->where('email',$email)->get();
+        if (sizeof($preview_user)==0) {
             return response()->json('El correo electrónico proporcionado no se encuentra asociado a cuenta alguna', 400);
         }
-        $this->send_email('password_recovery_request',$email);
+        $user_data = $preview_user[0];
+        $user_data['recovery_token'] = $this->gen_token($email);
+        $this->send_email('password_recovery_request', $user_data);
         return response()->json('Solicitud de recuperación de contraseña enviada al correo electrónico proporcionado', 200);
     }
 
     public function reset_password(Request $data) {
-        // OBTENER EL EMAIL A PARTIR DEL TOKEN
-        $email = $data['email'];
+        if(!isset($data['token'])) {
+            return response()->json([
+                'error' => 'Token no recibido.'
+            ], 401);
+        }
+        $token = $data['token'];
+        $payload = JWT::decode($token, env('JWT_SECRET'), ['HS256']);
+        try {
+            $payload = JWT::decode($token, env('JWT_SECRET'), ['HS256']);
+            $timeRemaining = $payload->expiration_time - time();
+            if ($timeRemaining <= 0) {
+                return response()->json([
+                    'error' => 'Token caducado.'
+                ], 400);
+            }
+        } catch(ExpiredException $e) {
+            return response()->json([
+                'error' => 'Token caducado.'
+            ], 400);
+        } catch(Exception $e) {
+            return response()->json([
+                'error' => 'Token no válido'
+            ], 400);
+        }
+        $email = $payload->email;
         $toUpdate = [];
         $toUpdate['timestamp'] = date('Y-m-d H:i:s');
         $toUpdate['active'] = true;
@@ -78,7 +105,9 @@ class AuthController extends Controller {
         $toUpdate['password'] = Crypt::encryptString($password);
         $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
-            $this->send_email('password_reset',$toUpdate);
+            $user_data = DB::collection($this->folder)->where('email', $email)->first();
+            $user_data['password'] = $password;
+            $this->send_email('password_reset', $user_data);
             return response()->json('Contraseña actualizada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
         } else {
             return response()->json('Ocurrió un error al resetear la contraseña del usuario', 400);
@@ -95,7 +124,9 @@ class AuthController extends Controller {
         $toUpdate['password'] = Crypt::encryptString($password);
         $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
-            $this->send_email('password_reset_admin',$toUpdate);
+            $user_data = DB::collection($this->folder)->where('item_id', $id)->first();
+            $user_data['password'] = $password;
+            $this->send_email('password_reset_admin', $user_data);
             return response()->json('Contraseña generada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
         } else {
             return response()->json('Ocurrió un error al resetear la contraseña del usuario', 400);
@@ -119,7 +150,8 @@ class AuthController extends Controller {
             $item['login_tries'] = 0;
             $item['password'] = Crypt::encryptString($password);
             DB::collection($this->folder)->insert($item);
-            $this->send_email('register',$item);
+            $item['password'] = $password;
+            $this->send_email('register', $item);
             return response()->json('Cuenta creada satisfactoriamente, la contraseña a sido enviada al correo electrónico proporcionado', 200);
         } catch( Exception $e ) {
             return response()->json('Error al crear la cuenta, debe proporcionar un objeto item con el email al que se asociará la cuenta', 400);
@@ -231,20 +263,53 @@ class AuthController extends Controller {
         }
     }
 
-    private function send_email($tipo, $data) {
+    private function send_email($tipo, $userdata) {
+        $toAlias = $userdata['email'];
+        $to = $userdata['email'];
+        $fromMail = env('MAIL_FROM_ADDRESS');
+        $fromAlias = env('APP_NAME');
+        $body = '';
+        $subject = '';
+        $blade_mail = 'mail';
         switch($tipo) {
             case 'password_reset_admin':
+                $subject = 'Reseteo de Contraseña';
+                $blade_mail = 'password_reset';
+                $data = ['name'=>$toAlias, 'password'=>$userdata['password'], 'appName'=>env('APP_NAME')];
                 break;
             case 'password_recovery_request':
+                $body = 'Para cambiar su contraseña de click en el siguiente enlace: ';
+                $subject = 'Solicitud de Reseteo de Contraseña';
+                $blade_mail = 'password_reset_request';
+                $data = ['name'=>$toAlias, 'token'=>$userdata['recovery_token'], 'appName'=>env('APP_NAME')];
                 break;
             case 'password_reset':
+                $subject = 'Reseteo de Contraseña';
+                $blade_mail = 'password_reset';
+                $data = ['name'=>$toAlias, 'password'=>$userdata['password'], 'appName'=>env('APP_NAME')];
                 break;
             case 'register':
+                $body = 'Su contraseña es: ' . $userdata['password'];
+                $subject = 'Creación de Cuenta';
+                $blade_mail = 'mail';
+                $data = ['name'=>$toAlias, 'body'=>$body, 'appName'=>env('APP_NAME')];
                 break;
         }
+        Mail::send($blade_mail, $data, function($message) use ($to, $toAlias, $subject, $fromMail,$fromAlias) {
+          $message->to($to, $toAlias)->subject($subject);
+          $message->from($fromMail,$fromAlias);
+        });
     }
 
     private function gen_password() {
         return Str::random(10);
+    }
+
+    private function gen_token($email) {
+        $token = [
+            'email' => $email,
+            'expiration_time' => time() + 60*60
+        ];
+        return JWT::encode($token, env('JWT_SECRET'));
     }
 }
