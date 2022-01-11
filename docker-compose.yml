@@ -1,0 +1,70 @@
+version: '3'
+
+networks:
+  mongo_admin:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+services:
+  web:
+    ports:
+    - "8586:80"
+    - "85443:443"
+    image: nginx:latest
+    restart: always
+    volumes:
+    - ./public_html:/public_html
+    - ./public_html:/public_html
+    - ./conf.d:/etc/nginx/conf.d
+    - ./ssl_certificates:/etc/nginx/ssl_certificates
+    - ./ssl_keys:/etc/nginx/ssl_keys
+    - ./logs:var/log/nginx/
+    networks:
+      mongo_admin:
+        ipv4_address: 172.30.0.11
+    environment:
+      TZ: America/Bogota
+    links:
+    - php
+  php:
+    image: pasthortown/php:latest
+    restart: always
+    volumes:
+    - ./public_html:/public_html
+    - ./php_confs/php.ini:/usr/local/etc/php/php.ini
+    - ./php_confs/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    networks:
+      mongo_admin:
+        ipv4_address: 172.30.0.12
+    env_file:
+    - ./public_html/lumen/.env
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/.composer/vendor/bin
+      TZ: America/Bogota
+    links:
+    - mongo
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes: 
+    - ./db/mongo_auth_data:/data/db
+    env_file:
+    - ./public_html/lumen/.env
+    networks:
+      mongo_admin:
+        ipv4_address: 172.30.0.13
+  mongo_express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+    - "9090:8081"
+    env_file:
+    - ./public_html/lumen/.env
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+    networks:
+      mongo_admin:
+        ipv4_address: 172.30.0.14
+    links:
+    - mongo
