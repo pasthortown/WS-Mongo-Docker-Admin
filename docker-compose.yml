@@ -9,17 +9,16 @@ networks:
 services:
   web:
     ports:
-    - "8586:80"
-    - "85443:443"
+    - "80:80"
+    - "443:443"
     image: nginx:latest
     restart: always
     volumes:
     - ./public_html:/public_html
-    - ./public_html:/public_html
     - ./conf.d:/etc/nginx/conf.d
     - ./ssl_certificates:/etc/nginx/ssl_certificates
     - ./ssl_keys:/etc/nginx/ssl_keys
-    - ./logs:var/log/nginx/
+    - ./logs:/var/log/nginx
     networks:
       mongo_admin:
         ipv4_address: 172.30.0.11
@@ -41,7 +40,6 @@ services:
     - ./public_html/lumen/.env
     environment:
       PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/.composer/vendor/bin
-      TZ: America/Bogota
     links:
     - mongo
   mongo:
