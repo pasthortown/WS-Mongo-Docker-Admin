@@ -17,18 +17,13 @@ use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller {
 
-    protected $folder = 'users';
-
-    private function __construct() {
-        $this->folder = env('ACCOUNTS_DB');
-    }
 
     public function login(Request $data) {
         $body = $data->json()->all();
         try {
             $password = $body['password'];
             $email = $body['email'];
-            $user = DB::collection($this->folder)
+            $user = DB::collection(env('ACCOUNTS_DB'))
                 ->where('email',$email)
                 ->first();
             if (!$user) {
@@ -48,13 +43,13 @@ class AuthController extends Controller {
                 } else {
                     $message = 'Acceso no autorizado, intentos disponibles '. (env('MAX_LOGIN_TRIES')-$toUpdate['login_tries']);
                 }
-                $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+                $updated = DB::collection(env('ACCOUNTS_DB'))->where('email', $email)->update($toUpdate, ['upsert' => false]);
                 return response()->json($message, 400);
             }
             $toUpdate['login_tries'] = 0;
             $token = $this->gen_token($email, env('TOKEN_LIFETIME'));
             $toUpdate['token'] = $token;
-            $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+            $updated = DB::collection(env('ACCOUNTS_DB'))->where('email', $email)->update($toUpdate, ['upsert' => false]);
             unset($user['password']);
             $toReturn = new stdClass();
             $toReturn->token = $token;
@@ -67,7 +62,7 @@ class AuthController extends Controller {
 
     public function recovery(Request $data) {
         $email = $data['email'];
-        $preview_user = DB::collection($this->folder)->where('email',$email)->get();
+        $preview_user = DB::collection(env('ACCOUNTS_DB'))->where('email',$email)->get();
         if (sizeof($preview_user)==0) {
             return response()->json('El correo electrónico proporcionado no se encuentra asociado a cuenta alguna', 400);
         }
@@ -109,9 +104,9 @@ class AuthController extends Controller {
         $toUpdate['login_tries'] = 0;
         $password = $this->gen_password();
         $toUpdate['password'] = Crypt::encryptString($password);
-        $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
+        $updated = DB::collection(env('ACCOUNTS_DB'))->where('email', $email)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
-            $user_data = DB::collection($this->folder)->where('email', $email)->first();
+            $user_data = DB::collection(env('ACCOUNTS_DB'))->where('email', $email)->first();
             $user_data['password'] = $password;
             $this->send_email('password_reset', $user_data);
             return response()->json('Contraseña actualizada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
@@ -128,9 +123,9 @@ class AuthController extends Controller {
         $toUpdate['login_tries'] = 0;
         $password = $this->gen_password();
         $toUpdate['password'] = Crypt::encryptString($password);
-        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        $updated = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
-            $user_data = DB::collection($this->folder)->where('item_id', $id)->first();
+            $user_data = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->first();
             $user_data['password'] = $password;
             $this->send_email('password_reset_admin', $user_data);
             return response()->json('Contraseña generada satisfactoriamente, la contraseña a sido enviada al correo electrónico del usuario', 200);
@@ -146,7 +141,7 @@ class AuthController extends Controller {
             $item = $body['item'];
             $email = $item['email'];
             $attributes = ['item_id', 'timestamp'];
-            $preview_user = DB::collection($this->folder)->where('email',$email)->get($attributes);
+            $preview_user = DB::collection(env('ACCOUNTS_DB'))->where('email',$email)->get($attributes);
             if (sizeof($preview_user)>0) {
                 return response()->json('El correo electrónico proporcionado ya se encuentra asociado a una cuenta', 400);
             }
@@ -155,7 +150,7 @@ class AuthController extends Controller {
             $item['active'] = true;
             $item['login_tries'] = 0;
             $item['password'] = Crypt::encryptString($password);
-            DB::collection($this->folder)->insert($item);
+            DB::collection(env('ACCOUNTS_DB'))->insert($item);
             $item['password'] = $password;
             $this->send_email('register', $item);
             return response()->json('Cuenta creada satisfactoriamente, la contraseña a sido enviada al correo electrónico proporcionado', 200);
@@ -174,7 +169,7 @@ class AuthController extends Controller {
             $item['active'] = true;
             $item['login_tries'] = 0;
             $item['password'] = Crypt::encryptString($item['email']);
-            DB::collection($this->folder)->insert($item);
+            DB::collection(env('ACCOUNTS_DB'))->insert($item);
             array_push($toReturn,$item);
         }
         return response()->json($toReturn, 200);
@@ -199,7 +194,7 @@ class AuthController extends Controller {
         } else {
             $filter = false;
         }
-        $toReturn = DB::collection($this->folder);
+        $toReturn = DB::collection(env('ACCOUNTS_DB'));
         if ($filter) {
             $toReturn = $toReturn->where($filter['attribute'], $filter['value']);
         } else {
@@ -225,7 +220,7 @@ class AuthController extends Controller {
         $id = $body['item_id'];
         $item = $body['item'];
         $item['timestamp'] = date('Y-m-d H:i:s');
-        $updated = DB::collection($this->folder)->where('item_id', $id)->update($item, ['upsert' => false]);
+        $updated = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->update($item, ['upsert' => false]);
         if ($updated) {
             return response()->json('Datos del Usuario Actualizados Correctamente', 200);
         } else {
@@ -235,7 +230,7 @@ class AuthController extends Controller {
 
     public function delete_user(Request $data) {
         $id = $data['item_id'];
-        $deleted = DB::collection($this->folder)->where('item_id',$id)->delete();
+        $deleted = DB::collection(env('ACCOUNTS_DB'))->where('item_id',$id)->delete();
         if ($deleted) {
             return response()->json('Usuario Eliminado Correctamente', 200);
         } else {
@@ -248,7 +243,7 @@ class AuthController extends Controller {
         $toUpdate = [];
         $toUpdate['timestamp'] = date('Y-m-d H:i:s');
         $toUpdate['disabled'] = true;
-        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        $updated = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
             return response()->json('Usuario Bloqueado Correctamente', 200);
         } else {
@@ -261,7 +256,7 @@ class AuthController extends Controller {
         $toUpdate = [];
         $toUpdate['timestamp'] = date('Y-m-d H:i:s');
         $toUpdate['disabled'] = false;
-        $updated = DB::collection($this->folder)->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
+        $updated = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->update($toUpdate, ['upsert' => false]);
         if ($updated) {
             return response()->json('Usuario Desbloqueado Correctamente', 200);
         } else {

@@ -15,7 +15,7 @@
 						"header": [
 							{
 								"key": "token",
-								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InBhc3RvcmNoZXNzbWFzdGVyQGdtYWlsLmNvbSIsImV4cGlyYXRpb25fdGltZSI6MTY0MTg2NjE3OX0.bw4DtybTg2kJ8bX-n9365LTmdOrbrcqPz-OrY1RoGXc",
+								"value": "{{token}}",
 								"type": "default"
 							}
 						],
@@ -44,7 +44,7 @@
 						"header": [
 							{
 								"key": "token",
-								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InBhc3RvcmNoZXNzbWFzdGVyQGdtYWlsLmNvbSIsImV4cGlyYXRpb25fdGltZSI6MTY0MTg2NjE3OX0.bw4DtybTg2kJ8bX-n9365LTmdOrbrcqPz-OrY1RoGXc",
+								"value": "{{token}}",
 								"type": "default"
 							}
 						],
@@ -70,7 +70,13 @@
 					"name": "update_item",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"item_id\":\"61d93036acb18\",\r\n    \"item\":{\r\n        \"primero_nombre\":\"cornelo\"\r\n    }\r\n}"
@@ -93,7 +99,13 @@
 					"name": "delete_item",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
 						"url": {
 							"raw": "{{url_backend}}/{{mz_db}}/{{mz_folder}}/delete_item?item_id=61d93036acb18",
 							"host": [
@@ -233,7 +245,13 @@
 							"name": "upload_users",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"nombre\":\"luis\",\r\n            \"apellido\":\"salazar\",\r\n            \"email\":\"pastorchessmaster@gmail.com\"\r\n        },\r\n        {\r\n            \"nombre\":\"andres\",\r\n            \"apellido\":\"romero\",\r\n            \"email\":\"andres.romero.barreto@gmail.com\"\r\n        },\r\n        {\r\n            \"nombre\":\"cornelio\",\r\n            \"apellido\":\"williams\",\r\n            \"email\":\"elcorso@gmail.com\"\r\n        }\r\n    ]\r\n}"
@@ -257,7 +275,13 @@
 							"name": "get_users",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"output_sdfsdfsdmodel\":{\r\n        \"nombre\":1\r\n    },\r\n    \"filtesdsdr\": {\r\n        \"attribute\":\"nombre\",\r\n        \"value\":\"luis\"\r\n    }\r\n}"
@@ -281,7 +305,13 @@
 							"name": "update_user",
 							"request": {
 								"method": "PUT",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"item_id\":\"61db9c6088b80\",\r\n    \"item\":{\r\n        \"nombre\":\"Lucho\"\r\n    }\r\n}"
@@ -305,7 +335,13 @@
 							"name": "delete_user",
 							"request": {
 								"method": "DELETE",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"url": {
 									"raw": "{{url_backend}}/api/auth/user/delete_user?item_id=61db9c60cac71",
 									"host": [
@@ -334,7 +370,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": ""
@@ -367,7 +409,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": ""
@@ -400,7 +448,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": ""
