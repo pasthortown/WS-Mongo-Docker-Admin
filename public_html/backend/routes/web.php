@@ -25,7 +25,6 @@ $router->group(['prefix'=>'/{dbname}/{folder}', 'middleware'=>['multidb', 'auth'
     $router->post('get_items', ['uses'=>'CatalogController@get_items']);
     $router->post('upload_items', ['uses'=>'CatalogController@upload_items']);
     $router->put('update_item', ['uses'=>'CatalogController@update_item']);
-    $router->get('search_items', ['uses'=>'CatalogController@search_items']);
     $router->delete('delete_item', ['uses'=>'CatalogController@delete_item']);
 });
 
@@ -33,7 +32,6 @@ $router->group(['prefix'=>'/{folder}', 'middleware'=>['multidmz']], function() u
     $router->post('get_items', ['uses'=>'CatalogController@get_items']);
     $router->post('upload_items', ['uses'=>'CatalogController@upload_items']);
     $router->put('update_item', ['uses'=>'CatalogController@update_item']);
-    $router->get('search_items', ['uses'=>'CatalogController@search_items']);
     $router->delete('delete_item', ['uses'=>'CatalogController@delete_item']);
 });
 
