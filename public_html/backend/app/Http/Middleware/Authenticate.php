@@ -64,8 +64,18 @@ class Authenticate
                 'error' => 'Token no válido'
             ], 400);
         }
+        $user = DB::collection(env('ACCOUNTS_DB'))
+                ->where('token',$token)
+                ->first();
+        if (!$user) {
+            return response()->json([
+                'error' => 'Token no válido'
+            ], 400);
+        }
         $request->payload = $payload;
+        $request->user = $user;
         return $next($request);
+        // VALIDAR SI EL TOKEN PRESENTADO ES EL OTORGADO
     }
 
 }

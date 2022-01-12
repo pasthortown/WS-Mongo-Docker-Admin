@@ -12,15 +12,6 @@ use stdClass;
 
 class CatalogController extends Controller {
 
-
-    public function pruebamz(Request $data, $folder) {
-        return 'entre mz';
-    }
-
-    public function prueba(Request $data, $folder) {
-        return 'entre DMZ';
-    }
-
     public function upload_items(Request $data, $folder) {
         $toReturn = [];
         $body = $data->json()->all();

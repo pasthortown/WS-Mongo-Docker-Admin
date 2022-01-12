@@ -16,7 +16,7 @@
                 <br><br><br>
                 Recibe un cordial saludo de {{ $appName }}.<br><br>
                 Hemos recibido una solicitud de reseteo de contraseña. Para confirmar, de click en el siguiente enlace.<br><br>
-                <a href="http://localhost:8586/api/auth/user/reset_password?token={{ $token }}">Confirmar</a>
+                <a href="{{ $url_reset_password_request }}/api/auth/user/reset_password?token={{ $token }}">Confirmar</a>
                 <br><br><br>
                 Atentamente,<br>
                 <strong> {{ $appName }}</strong>

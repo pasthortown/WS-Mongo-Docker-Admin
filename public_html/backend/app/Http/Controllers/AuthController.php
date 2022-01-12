@@ -19,6 +19,10 @@ class AuthController extends Controller {
 
     protected $folder = 'users';
 
+    private function __construct() {
+        $this->folder = env('ACCOUNTS_DB');
+    }
+
     public function login(Request $data) {
         $body = $data->json()->all();
         try {
@@ -38,20 +42,22 @@ class AuthController extends Controller {
             }
             if ($password !== Crypt::decryptString($user['password'])) {
                 $toUpdate['login_tries'] = $user['login_tries'] + 1;
-                if ($toUpdate['login_tries'] == 3) {
+                if ($toUpdate['login_tries'] == env('MAX_LOGIN_TRIES')) {
                     $toUpdate['active'] = false;
                     $message = 'Cuenta bloqueada por exceso de intentos';
                 } else {
-                    $message = 'Acceso no autorizado, intentos disponibles '. (3-$toUpdate['login_tries']);
+                    $message = 'Acceso no autorizado, intentos disponibles '. (env('MAX_LOGIN_TRIES')-$toUpdate['login_tries']);
                 }
                 $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
                 return response()->json($message, 400);
             }
             $toUpdate['login_tries'] = 0;
+            $token = $this->gen_token($email, env('TOKEN_LIFETIME'));
+            $toUpdate['token'] = $token;
             $updated = DB::collection($this->folder)->where('email', $email)->update($toUpdate, ['upsert' => false]);
             unset($user['password']);
             $toReturn = new stdClass();
-            $toReturn->token = $this->gen_token($email);
+            $toReturn->token = $token;
             $toReturn->user_data = $user;
             return response()->json($toReturn, 200);
         } catch( Exception $e ) {
@@ -66,7 +72,7 @@ class AuthController extends Controller {
             return response()->json('El correo electrónico proporcionado no se encuentra asociado a cuenta alguna', 400);
         }
         $user_data = $preview_user[0];
-        $user_data['recovery_token'] = $this->gen_token($email);
+        $user_data['recovery_token'] = $this->gen_token($email, env('RECOVERY_TOKEN_LIFETIME'));
         $this->send_email('password_recovery_request', $user_data);
         return response()->json('Solicitud de recuperación de contraseña enviada al correo electrónico proporcionado', 200);
     }
@@ -281,7 +287,7 @@ class AuthController extends Controller {
                 $body = 'Para cambiar su contraseña de click en el siguiente enlace: ';
                 $subject = 'Solicitud de Reseteo de Contraseña';
                 $blade_mail = 'password_reset_request';
-                $data = ['name'=>$toAlias, 'token'=>$userdata['recovery_token'], 'appName'=>env('APP_NAME')];
+                $data = ['name'=>$toAlias, 'token'=>$userdata['recovery_token'], 'appName'=>env('APP_NAME'), 'url_reset_password_request'=>env('APP_URL')];
                 break;
             case 'password_reset':
                 $subject = 'Reseteo de Contraseña';
@@ -302,13 +308,13 @@ class AuthController extends Controller {
     }
 
     private function gen_password() {
-        return Str::random(10);
+        return Str::random(env('PASWORD_LENGTH'));
     }
 
-    private function gen_token($email) {
+    private function gen_token($email, $token_lifetime) {
         $token = [
             'email' => $email,
-            'expiration_time' => time() + 60*60
+            'expiration_time' => time() + $token_lifetime * 60
         ];
         return JWT::encode($token, env('JWT_SECRET'));
     }
