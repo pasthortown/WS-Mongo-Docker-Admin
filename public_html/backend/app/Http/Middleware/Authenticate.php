@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Factory as Auth;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
+use Illuminate\Support\Facades\DB;
 
 use App\Utils\Helpers;
 use Illuminate\Support\Facades\Config;
