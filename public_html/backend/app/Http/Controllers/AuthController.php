@@ -51,7 +51,9 @@ class AuthController extends Controller {
             $toUpdate['token'] = $token;
             $updated = DB::collection(env('ACCOUNTS_DB'))->where('email', $email)->update($toUpdate, ['upsert' => false]);
             unset($user['password']);
+            unset($user['token']);
             $toReturn = new stdClass();
+            $toReturn->updated = $updated;
             $toReturn->token = $token;
             $toReturn->user_data = $user;
             return response()->json($toReturn, 200);
@@ -146,6 +148,7 @@ class AuthController extends Controller {
                 return response()->json('El correo electrónico proporcionado ya se encuentra asociado a una cuenta', 400);
             }
             $item['timestamp'] = date('Y-m-d H:i:s');
+            $item['item_id'] = uniqid();
             $item['disabled'] = false;
             $item['active'] = true;
             $item['login_tries'] = 0;
@@ -220,6 +223,7 @@ class AuthController extends Controller {
         $id = $body['item_id'];
         $item = $body['item'];
         $item['timestamp'] = date('Y-m-d H:i:s');
+        $item['password'] = Crypt::encryptString($item['password']);
         $updated = DB::collection(env('ACCOUNTS_DB'))->where('item_id', $id)->update($item, ['upsert' => false]);
         if ($updated) {
             return response()->json('Datos del Usuario Actualizados Correctamente', 200);

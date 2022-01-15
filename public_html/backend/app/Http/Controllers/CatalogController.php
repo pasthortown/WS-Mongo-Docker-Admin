@@ -6,6 +6,7 @@ use App\Models\DummyModel;
 use Illuminate\Http\Request;
 use Exception;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Support\Facades\DB;
 use stdClass;
@@ -24,7 +25,7 @@ class CatalogController extends Controller {
         return response()->json($toReturn, 200);
     }
 
-    public function get_items(Request $data, $folder) {
+    public function get_items(Request $data, $folder, $dbname) {
         $id = $data['item_id'];
         $body = $data->json()->all();
         if (array_key_exists('output_model', $body)) {

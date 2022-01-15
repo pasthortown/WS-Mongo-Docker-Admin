@@ -74,15 +74,16 @@ $app->configure('app');
 |
 */
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->middleware([
+    App\Http\Middleware\ExampleMiddleware::class,
+    palanik\lumen\Middleware\LumenCors::class
+]);
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
     'multidb' => App\Http\Middleware\MultiDB::class,
     'multidmz' => App\Http\Middleware\MultiDMZ::class,
-    'bddauth' => App\Http\Middleware\BddAuth::class,
+    'bddauth' => App\Http\Middleware\BddAuth::class
 ]);
 
 $app->routeMiddleware([

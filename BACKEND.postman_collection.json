@@ -1,0 +1,635 @@
+{
+	"info": {
+		"_postman_id": "bf054952-a43d-4d48-9f48-100337e26a75",
+		"name": "BACKEND",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "MZ",
+			"item": [
+				{
+					"name": "get_items",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"outpsfsdfsdut_model\":{\r\n        \"nombre\":1\r\n    },\r\n    \"filtesdsdr\": {\r\n        \"attribute\":\"nombre\",\r\n        \"value\":\"luis\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{mz_db}}/{{mz_folder}}/get_items",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{mz_db}}",
+								"{{mz_folder}}",
+								"get_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload_items",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"nombre\":\"luis\",\r\n            \"apellido\":\"salazar\"\r\n        },\r\n        {\r\n            \"nombre\":\"andres\",\r\n            \"apellido\":\"romero\"\r\n        },\r\n        {\r\n            \"nombre\":\"cornelio\",\r\n            \"apellido\":\"williams\"\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{mz_db}}/{{mz_folder}}/upload_items",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{mz_db}}",
+								"{{mz_folder}}",
+								"upload_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"item_id\":\"61d93036acb18\",\r\n    \"item\":{\r\n        \"primero_nombre\":\"cornelo\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{mz_db}}/{{mz_folder}}/update_item",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{mz_db}}",
+								"{{mz_folder}}",
+								"update_item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{url_backend}}/{{mz_db}}/{{mz_folder}}/delete_item?item_id=61d93036acb18",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{mz_db}}",
+								"{{mz_folder}}",
+								"delete_item"
+							],
+							"query": [
+								{
+									"key": "item_id",
+									"value": "61d93036acb18"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DMZ",
+			"item": [
+				{
+					"name": "get_items",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InBhc3RvcmNoZXNzbWFzdGVyQGdtYWlsLmNvbSIsImV4cGlyYXRpb25fdGltZSI6MTY0MTg2NjE3OX0.bw4DtybTg2kJ8bX-n9365LTmdOrbrcqPz-OrY1RoGXc",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"outpsfsdfsdut_model\":{\r\n        \"nombre\":1\r\n    },\r\n    \"filtesdsdr\": {\r\n        \"attribute\":\"nombre\",\r\n        \"value\":\"luis\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{dmz_folder}}/get_items",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{dmz_folder}}",
+								"get_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload_items",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InBhc3RvcmNoZXNzbWFzdGVyQGdtYWlsLmNvbSIsImV4cGlyYXRpb25fdGltZSI6MTY0MTg2NjE3OX0.bw4DtybTg2kJ8bX-n9365LTmdOrbrcqPz-OrY1RoGXc",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"nombre\":\"luis\",\r\n            \"apellido\":\"salazar\"\r\n        },\r\n        {\r\n            \"nombre\":\"andres\",\r\n            \"apellido\":\"romero\"\r\n        },\r\n        {\r\n            \"nombre\":\"cornelio\",\r\n            \"apellido\":\"williams\"\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{dmz_folder}}/upload_items",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{dmz_folder}}",
+								"upload_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_item",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"item_id\":\"61d93036acb18\",\r\n    \"item\":{\r\n        \"primero_nombre\":\"cornelo\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url_backend}}/{{dmz_folder}}/update_item",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{dmz_folder}}",
+								"update_item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url_backend}}/{{dmz_folder}}/delete_item?item_id=61d93036acb18",
+							"host": [
+								"{{url_backend}}"
+							],
+							"path": [
+								"{{dmz_folder}}",
+								"delete_item"
+							],
+							"query": [
+								{
+									"key": "item_id",
+									"value": "61d93036acb18"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "MZ",
+					"item": [
+						{
+							"name": "upload_users",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"nombre\":\"luis\",\r\n            \"apellido\":\"salazar\",\r\n            \"email\":\"pastorchessmaster@gmail.com\"\r\n        },\r\n        {\r\n            \"nombre\":\"andres\",\r\n            \"apellido\":\"romero\",\r\n            \"email\":\"andres.romero.barreto@gmail.com\"\r\n        },\r\n        {\r\n            \"nombre\":\"cornelio\",\r\n            \"apellido\":\"williams\",\r\n            \"email\":\"elcorso@gmail.com\"\r\n        }\r\n    ]\r\n}"
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/upload_users",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"upload_users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get_users",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"output_sdfsdfsdmodel\":{\r\n        \"nombre\":1\r\n    },\r\n    \"filtesdsdr\": {\r\n        \"attribute\":\"nombre\",\r\n        \"value\":\"luis\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/get_users",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"get_users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_user",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"item_id\":\"61db9c6088b80\",\r\n    \"item\":{\r\n        \"nombre\":\"Lucho\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/update_user",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"update_user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete_user",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/delete_user?item_id=61db9c60cac71",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"delete_user"
+									],
+									"query": [
+										{
+											"key": "item_id",
+											"value": "61db9c60cac71"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "lock_user",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/lock_user?item_id=61db9c6088b80",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"lock_user"
+									],
+									"query": [
+										{
+											"key": "item_id",
+											"value": "61db9c6088b80"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unlock_user",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/unlock_user?item_id=61db9c6088b80",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"unlock_user"
+									],
+									"query": [
+										{
+											"key": "item_id",
+											"value": "61db9c6088b80"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reset_password_user",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "token",
+										"value": "{{token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/reset_password_user?item_id=61db9c6088b80",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"reset_password_user"
+									],
+									"query": [
+										{
+											"key": "item_id",
+											"value": "61db9c6088b80"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "FREE ACCESS",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\":\"andres.romero.barreto@gmail.com\",\r\n    \"password\":\"QtWLzK8UV2\"\r\n}"
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/login",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "register",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"item\": {\r\n            \"nombre\":\"Andrés\",\r\n            \"apellido\":\"Romero\",\r\n            \"email\":\"andres.romero.barreto@gmail.com\"\r\n        }\r\n}"
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/register",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "recovery",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url_backend}}/api/auth/user/recovery?email=andres.romero.barreto@gmail.com",
+									"host": [
+										"{{url_backend}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"user",
+										"recovery"
+									],
+									"query": [
+										{
+											"key": "email",
+											"value": "andres.romero.barreto@gmail.com"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TEST",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_backend}}",
+					"host": [
+						"{{url_backend}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url_backend",
+			"value": "http://localhost:8586/",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "PEGUEVALORTOKEN",
+			"type": "string"
+		},
+		{
+			"key": "mz_db",
+			"value": "TEST_MZ_DB",
+			"type": "string"
+		},
+		{
+			"key": "mz_folder",
+			"value": "TEST_MZ_FOLDER",
+			"type": "string"
+		},
+		{
+			"key": "dmz_folder",
+			"value": "TEST_DMZ_FOLDER",
+			"type": "string"
+		}
+	]
+}

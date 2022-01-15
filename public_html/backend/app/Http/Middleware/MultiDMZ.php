@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Utils\Helpers;
 use Closure;
-use Illuminate\Support\Facades\Config;
 
 class MultiDMZ
 {

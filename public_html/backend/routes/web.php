@@ -14,14 +14,14 @@
 */
 
 $router->get('/', function () use ($router) {
-    return 'WS MONGO BDD';
+    return json_encode('WS MONGO BDD');
 });
 
 $router->get('/key', function() {
     return \Illuminate\Support\Str::random(32);
 });
 
-$router->group(['prefix'=>'/{dbname}/{folder}', 'middleware'=>['multidb', 'auth']], function() use ($router) {
+$router->group(['prefix'=>'/{dbname}/{folder}', 'middleware'=>['multidb']], function() use ($router) {
     $router->post('get_items', ['uses'=>'CatalogController@get_items']);
     $router->post('upload_items', ['uses'=>'CatalogController@upload_items']);
     $router->put('update_item', ['uses'=>'CatalogController@update_item']);
