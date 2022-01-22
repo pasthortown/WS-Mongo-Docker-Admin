@@ -57,7 +57,7 @@ def send(email, subject, params_in, template_name, attachments):
     params = params_in
     params['app_name']=allowed_app_name
     params['web_url']=web_url
-    to = [email]
+    to = email
     mailer.send_mail(
         smtp_server,
         smtp_port,
