@@ -61,6 +61,12 @@ class ActionHandler(RequestHandler):
     
     def post(self, action):
         content = json_decode(self.request.body)
+        if (action == 'update_user'):
+            attribute = content['attribute']
+            value = content['value']
+            email = content['email']
+            userdata = content['userdata']
+            respuesta = update_user(attribute, value, email, userdata)
         if (action == 'login'):
             email = content['email']
             password = content['password']
@@ -139,6 +145,26 @@ class AdminUsersActionHandler(RequestHandler):
             respuesta = reset_password_user(catalog, item_id)
         self.write(respuesta)
         return
+
+def update_user(attribute, value, email, userdata):
+    collection = db[catalog]
+    filter = {}
+    filter[attribute] = value
+    prev_users = collection.find(filter)
+    previous_users = json.loads(json_util.dumps(prev_users))
+    if (len(previous_users) == 0):
+        return {'response': 'Los datos proporcionados no se encuentran asociado a cuenta alguna', 'status':500}
+    else:
+        userdata['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        password = gen_password()
+        userdata['password'] = encrypt_password(password)
+        userdata['login_tries'] = 0
+        userdata['active'] = True
+        userdata['disabled'] = False
+        collection.update_one(filter, {'$set':userdata})
+        userdata['password'] = password
+        send_email_register('Creación de Cuenta', userdata)
+    return {'response': 'Usuario actualizado satisfactoriamente', 'status':200}
 
 def ldap_auth(email,password):
     ldap_server = os.getenv('ldap_server')
