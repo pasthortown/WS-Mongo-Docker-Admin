@@ -10,7 +10,7 @@ def send_mail(server, port, tls, username, password, send_from, send_to, subject
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('Templates'))
     with smtplib.SMTP(server,port) as smtp:
         msg = MIMEMultipart('alternative')
-        msg['From'] = send_from
+        msg['From'] = username
         msg['To'] = COMMASPACE.join(send_to)
         msg['Date'] = formatdate(localtime=True)
         msg['Subject'] = subject
@@ -25,6 +25,5 @@ def send_mail(server, port, tls, username, password, send_from, send_to, subject
         smtp.ehlo()
         if (tls == 1):
             smtp.starttls()
-        smtp.login(username, password)
-        smtp.sendmail(send_from, send_to, msg.as_string())
+        smtp.sendmail(username, send_to, msg.as_string())
         smtp.quit()

@@ -1,0 +1,6 @@
+pymongo==3.10.1
+tornado==4.3
+python-dateutil==2.5.3
+uuid==1.30
+zeep==4.0.0
+redis==4.1.4

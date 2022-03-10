@@ -1,9 +1,8 @@
-from email.utils import formatdate
+from tornado.httpserver import HTTPServer
 import os
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
-from tornado.httpserver import HTTPServer
 from pymongo import MongoClient
 import datetime
 from bson import json_util
@@ -141,17 +140,41 @@ class AdminUsersActionHandler(RequestHandler):
         return
 
 def ldap_auth(email,password):
-    ldap_server = os.getenv('ldap_server')
-    ldap_protocol = os.getenv('ldap_protocol')
-    ldap_port = 389
     try:
-        connect = ldap.initialize('ldap://' + ldap_server + ':' + str(ldap_port))
+        ldap_server = os.getenv('ldap_server')
+        ldap_protocol = int(os.getenv('ldap_protocol'))
+        ldap_port =  os.getenv('ldap_port')
+        ldap_email_domain =  os.getenv('ldap_email_domain')
+        ldap_base_dn =  os.getenv('ldap_base_dn')
+    except:
+        return 'Es necesario configurar ldap_server, ldap_protocol, ldap_email_domain, ldap_base_dn y ldap_port'
+    try:
+        connect = ldap.initialize('ldap://' + ldap_server + ':' + str(ldap_port))    
+    except ldap.SERVER_DOWN:
+        return 'No se puede conectar al LDAP'
+    try:
+        user = 'uid=' + email.split(str(ldap_email_domain))[0] + ',' + ldap_base_dn
         connect.set_option(ldap.OPT_REFERRALS, 0)
         connect.set_option(ldap.OPT_PROTOCOL_VERSION, ldap_protocol)
-        connect.simple_bind_s(email, password)
-        return 'Validado'
+        connect.simple_bind_s(user, password)
+        return do_login(email)
     except Exception:
-        return 'No Validado'
+        return {'response': 'Usuario no Autorizado', 'userdata': '', 'token':'', 'status':500}
+
+def do_login(email):
+    collection = db[catalog]
+    filter = {"email":email}
+    users = collection.find(filter)
+    for user in users:
+        disabled = user['disabled']
+        if (disabled == True):
+            return {'response': 'La cuenta ha sido bloqueada por el administrador', 'userdata':'', 'token':'', 'status':500}
+        update_query = { "$set": { 'login_tries': 0 } }
+        collection.update_one(filter, update_query)
+        user.pop('password',None)
+        user_to_return = json.loads(json_util.dumps(user))
+        return {'response':'Usuario Autorizado', 'userdata': user_to_return, 'token':generate_token(), 'status':200}        
+    return {'response': 'Usuario no Autorizado', 'userdata': '', 'token':'', 'status':500}
 
 def check_by_attribute(attribute, value):
     collection = db[catalog]
