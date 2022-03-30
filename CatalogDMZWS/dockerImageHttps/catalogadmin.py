@@ -140,7 +140,7 @@ def search_items(catalog, attribute, value, output_model):
     items = collection.find(filter, output_model)
     items_to_return = json.loads(json_util.dumps(items))
     if (len(items_to_return)>0):
-        toReturn = items_to_return[0]
+        toReturn = items_to_return
         status = 200
     else:
         toReturn = 'Elemento no encontrado'
