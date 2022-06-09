@@ -53,6 +53,11 @@ class ActionHandler(RequestHandler):
             respuesta = write(invoice, log)
         if (action == 'read'):
             respuesta = read(invoice)
+        if (action == 'search'):
+            attribute = content['attribute']
+            value = content['value']
+            output_model = content['output_model']
+            respuesta = search(invoice, attribute, value, output_model)
         self.write(respuesta)
         return
 
@@ -70,6 +75,23 @@ def read(invoice):
     logs_to_return = json.loads(json_util.dumps(logs))
     status = 200
     return {'response':logs_to_return, 'status':status}
+
+def search(invoice, attribute, value, output_model):
+    collection = db[invoice]
+    output_model['_id'] = False
+    output_model['log_id'] = True
+    output_model['timestamp'] = True
+    filter = {}
+    filter[attribute] = value
+    items = collection.find(filter, output_model)
+    items_to_return = json.loads(json_util.dumps(items))
+    if (len(items_to_return)>0):
+        toReturn = items_to_return
+        status = 200
+    else:
+        toReturn = 'Registro de Auditoría no encontrado'
+        status = 500
+    return {'response':toReturn, 'status':status}
 
 def validate_token(token):
     try:
