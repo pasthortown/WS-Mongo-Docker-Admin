@@ -63,11 +63,30 @@ class ActionHandler(RequestHandler):
         if (action == 'supercias'):
             number = content['identificacion']
             respuesta = get_supercias(number)
+        if (action == 'soap_status'):
+            ruc = content['ruc']
+            cedula = content['cedula']
+            respuesta = get_soap_status(ruc, cedula)
         self.write(respuesta)
         return
 
 def prepare_mongo_data(items):
     return json.loads(json_util.dumps(items))
+
+def get_soap_status(ruc, cedula):
+    return {
+        "get_cedula": get_cedula_data(cedula), 
+        "get_admin_data": get_admin_data(ruc),
+        "get_companias_data": get_companias_data(ruc),
+        "get_sri_ruc": get_sri_ruc(ruc),
+        "get_sri_establecimientos": get_sri_establecimientos(ruc),
+        "get_sri_ruc_completo": get_sri_ruc_completo(ruc),
+        "get_sri_ruc_datos": get_sri_ruc_datos(ruc),
+        "get_sri_actividad_economica": get_sri_actividad_economica(ruc),
+        "get_sri_ubicaciones_geograficas": get_sri_ubicaciones_geograficas(ruc),
+        "get_sri_razon_social": get_sri_razon_social(ruc),
+        "get_sri_ruc_contactos": get_sri_ruc_contactos(ruc)
+    }
 
 def get_ruc(number):
     cache_data = cache.get('ruc_data_' + number)
