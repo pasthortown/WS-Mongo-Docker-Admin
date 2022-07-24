@@ -162,7 +162,7 @@ def update_user(attribute, value, email, userdata):
         userdata['disabled'] = False
         collection.update_one(filter, {'$set':userdata})
         userdata['password'] = password
-        send_email_register('Creación de Cuenta', userdata)
+        send_email_register('Actualización o Recuperación de Cuenta', userdata)
     return {'response': 'Usuario actualizado satisfactoriamente', 'status':200}
 
 def ldap_auth(email,password):
@@ -452,6 +452,9 @@ def send_email_register(subject, user):
     params['app_name']=allowed_app_name
     params['web_url']=web_url
     to = [user['email']]
+    template = 'register_account.html'
+    if (subject == 'Actualización o Recuperación de Cuenta'):
+        template = 'update_account.html'
     mailer.send_mail(
         smtp_server,
         smtp_port,
@@ -461,7 +464,7 @@ def send_email_register(subject, user):
         allowed_app_name,
         to,
         subject,
-        'register_account.html',
+        template,
         params,
         [])
 

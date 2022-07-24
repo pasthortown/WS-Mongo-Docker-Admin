@@ -61,11 +61,30 @@ class ActionHandler(RequestHandler):
         if (action == 'supercias'):
             number = content['identificacion']
             respuesta = get_supercias(number)
+        if (action == 'soap_status'):
+            ruc = content['ruc']
+            cedula = content['cedula']
+            respuesta = get_soap_status(ruc, cedula)
         self.write(respuesta)
         return
 
 def prepare_mongo_data(items):
     return json.loads(json_util.dumps(items))
+
+def get_soap_status(ruc, cedula):
+    return {
+        "get_cedula": get_cedula_data(cedula), 
+        "get_admin_data": get_admin_data(ruc),
+        "get_companias_data": get_companias_data(ruc),
+        "get_sri_ruc": get_sri_ruc(ruc),
+        "get_sri_establecimientos": get_sri_establecimientos(ruc),
+        "get_sri_ruc_completo": get_sri_ruc_completo(ruc),
+        "get_sri_ruc_datos": get_sri_ruc_datos(ruc),
+        "get_sri_actividad_economica": get_sri_actividad_economica(ruc),
+        "get_sri_ubicaciones_geograficas": get_sri_ubicaciones_geograficas(ruc),
+        "get_sri_razon_social": get_sri_razon_social(ruc),
+        "get_sri_ruc_contactos": get_sri_ruc_contactos(ruc)
+    }
 
 def get_ruc(number):
     cache_data = cache.get('ruc_data_' + number)
@@ -78,6 +97,43 @@ def get_ruc(number):
     toReturn = {}
     toReturn['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     toReturn['number'] = number
+    if (len(ruc)>0):
+        try:
+            toReturn['sri_ruc_completo'] = ruc[0]['sri_ruc_completo']    
+        except:
+            toReturn['sri_ruc_completo'] = 'error'
+        try:
+            toReturn['sri_ruc_completo'] = ruc[0]['sri_ruc_completo']   
+        except:
+            toReturn['sri_ruc_completo'] = 'error'
+        try:
+            toReturn['sri_ruc'] = ruc[0]['sri_ruc']  
+        except:
+            toReturn['sri_ruc'] = 'error'
+        try:
+            toReturn['sri_establecimientos'] = ruc[0]['sri_establecimientos']   
+        except:
+            toReturn['sri_establecimientos'] = 'error'
+        try:
+            toReturn['sri_razon_social'] = ruc[0]['sri_razon_social']   
+        except:
+            toReturn['sri_razon_social'] = 'error'
+        try:
+            toReturn['sri_actividad_economica'] = ruc[0]['sri_actividad_economica']   
+        except:
+            toReturn['sri_actividad_economica'] = 'error'
+        try:
+            toReturn['sri_ruc_datos'] = ruc[0]['sri_ruc_datos']   
+        except:
+            toReturn['sri_ruc_datos'] = 'error'
+        try:
+            toReturn['sri_ruc_contactos'] = ruc[0]['sri_ruc_contactos']   
+        except:
+            toReturn['sri_ruc_contactos'] = 'error'
+        try:
+            toReturn['sri_ubicaciones_geograficas'] = ruc[0]['sri_ubicaciones_geograficas']   
+        except:
+            toReturn['sri_ubicaciones_geograficas'] = 'error'
     info_dinardap_sri_razon_social = get_sri_razon_social(number)
     info_dinardap_sri_actividad_economica = get_sri_actividad_economica(number)
     info_dinardap_sri_establecimientos = get_sri_establecimientos(number)
@@ -117,14 +173,14 @@ def get_ruc(number):
         else:
             collection.insert_one(toReturn)
         toSend = {
-            "sri_ruc_completo": info_dinardap_sri_ruc_completo,
+            "sri_ruc_completo": toReturn['sri_ruc_completo'],
             "sri_ruc": info_dinardap_sri_ruc,
-            "sri_establecimientos": info_dinardap_sri_establecimientos,
-            "sri_razon_social": info_dinardap_sri_razon_social,
-            "sri_actividad_economica": info_dinardap_sri_actividad_economica,
-            "sri_ruc_datos": info_dinardap_sri_ruc_datos,
-            "sri_ruc_contactos": info_dinardap_sri_ruc_contactos,
-            "sri_ubicaciones_geograficas": info_dinardap_sri_ubicaciones_geograficas
+            "sri_establecimientos": toReturn['sri_establecimientos'],
+            "sri_razon_social": toReturn['sri_razon_social'],
+            "sri_actividad_economica": toReturn['sri_actividad_economica'],
+            "sri_ruc_datos": toReturn['sri_ruc_datos'],
+            "sri_ruc_contactos": toReturn['sri_ruc_contactos'],
+            "sri_ubicaciones_geograficas": toReturn['sri_ubicaciones_geograficas']
         }
         cache.set('ruc_data_' + number, json.dumps(toSend), ex=int(redis_live))
         return toSend
