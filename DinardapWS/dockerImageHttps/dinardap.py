@@ -91,7 +91,21 @@ def get_soap_status(ruc, cedula):
 def get_ruc(number):
     cache_data = cache.get('ruc_data_' + number)
     if (cache_data != None):
-        return json.loads(cache_data)
+        toReturn = 'error'
+        try:
+            toReturn = json.loads(cache_data)            
+        except:
+            toReturn = {
+                "sri_ruc_completo": 'error',
+                "sri_ruc": 'error',
+                "sri_establecimientos": 'error',
+                "sri_razon_social": 'error',
+                "sri_actividad_economica": 'error',
+                "sri_ruc_datos": 'error',
+                "sri_ruc_contactos": 'error',
+                "sri_ubicaciones_geograficas": 'error'
+            }
+        return toReturn
     collection = db['RUC']
     filter = {"number": number}
     bdd_info = collection.find(filter)
@@ -205,7 +219,12 @@ def get_ruc(number):
 def get_cedula(number):
     cache_data = cache.get('cedula_data_' + number)
     if (cache_data != None):
-        return json.loads(cache_data)
+        toReturn = 'error'
+        try:
+            toReturn = json.loads(cache_data)            
+        except:
+            toReturn = 'error'
+        return toReturn
     collection = db['Cedulas']
     filter = {"number": number}
     bdd_info = collection.find(filter)
@@ -231,7 +250,12 @@ def get_cedula(number):
 def get_supercias(number):
     cache_data = cache.get('supercias_data_' + number)
     if (cache_data != None):
-        return json.loads(cache_data)
+        toReturn = 'error'
+        try:
+            toReturn = json.loads(cache_data)            
+        except:
+            toReturn = {"companias": 'error', "administrador": 'error'}
+        return toReturn
     collection = db['Superintendencia_Companias']
     filter = {"ruc": number}
     bdd_info = collection.find(filter)
